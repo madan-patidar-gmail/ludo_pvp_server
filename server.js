@@ -5,10 +5,18 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
+// 🔥 IMPORTANT: Railway compatible config
 const io = new Server(server, {
   cors: {
     origin: "*",
-  }
+    methods: ["GET", "POST"]
+  },
+  transports: ["websocket", "polling"]
+});
+
+// Test route
+app.get("/", (req, res) => {
+  res.send("PvP Server Running 🚀");
 });
 
 io.on("connection", (socket) => {
@@ -16,7 +24,7 @@ io.on("connection", (socket) => {
 
   socket.on("joinRoom", (room) => {
     socket.join(room);
-    console.log(`Player ${socket.id} joined ${room}`);
+    console.log("Joined:", room);
   });
 
   socket.on("move", (data) => {
@@ -24,11 +32,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Player disconnected:", socket.id);
+    console.log("Disconnected:", socket.id);
   });
 });
 
+// 🔥 MUST USE process.env.PORT
 const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("Server running on port " + PORT);
 });
